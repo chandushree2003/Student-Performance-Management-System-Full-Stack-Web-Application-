@@ -1,0 +1,43 @@
+dir
+npm init -y
+npm install express mysql2 cors
+
+
+Frontend
+
+HTML for structure
+
+CSS for styling & responsiveness
+
+JavaScript (fetch) for API calls
+
+
+
+Backend
+
+Node.js + Express
+
+REST APIs (POST, GET, PUT, DELETE)
+
+Business logic handled in server
+
+
+
+Database
+
+MySQL
+
+Unique constraint on USN to avoid duplicates
+
+Features
+
+Add, update, delete students
+
+Filter top performers
+
+Responsive UI
+
+Data integrity enforced at DB level
+
+Flow
+Browser → JavaScript → Express API → MySQL → JSON → UI

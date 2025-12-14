@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Student Performance Tracker</title>
+  <style>
+    body {
+      font-family: Arial;
+      background: #f4f6f8;
+      padding: 10px;
+    }
+    h2 { text-align: center; }
+    .form, .buttons { text-align: center; margin-bottom: 15px; }
+    input {
+      padding: 8px;
+      margin: 5px;
+      width: 180px;
+    }
+    button {
+      padding: 8px 14px;
+      margin: 5px;
+      border: none;
+      background: #007bff;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: center;
+    }
+    th { background: #007bff; color: white; }
+    @media (max-width: 600px) {
+      input { width: 100%; }
+      table { font-size: 12px; }
+    }
+  </style>
+</head>
+
+<body>
+
+<h2>Student Performance Tracker</h2>
+
+<div class="form">
+  <input id="id" hidden>
+  <input id="usn" placeholder="USN">
+  <input id="name" placeholder="Name">
+  <input id="marks" type="number" placeholder="Marks">
+  <br>
+  <button onclick="save()">Save</button>
+</div>
+
+<div class="buttons">
+  <button onclick="loadAll()">All Students</button>
+  <button onclick="loadTop()">Top Students</button>
+</div>
+
+<table id="table"></table>
+
+<script>
+function loadAll() {
+  fetch("http://localhost:3000/students")
+    .then(r => r.json())
+    .then(show);
+}
+
+function loadTop() {
+  fetch("http://localhost:3000/students/top")
+    .then(r => r.json())
+    .then(show);
+}
+
+function show(data) {
+  let html = `
+    <tr>
+      <th>ID</th><th>USN</th><th>Name</th>
+      <th>Marks</th><th>Grade</th><th>Actions</th>
+    </tr>`;
+
+  data.forEach(s => {
+    html += `
+      <tr>
+        <td>${s.id}</td>
+        <td>${s.usn}</td>
+        <td>${s.name}</td>
+        <td>${s.marks}</td>
+        <td>${s.grade}</td>
+        <td>
+          <button onclick='edit(${JSON.stringify(s)})'>Edit</button>
+          <button onclick='del(${s.id})'>Delete</button>
+        </td>
+      </tr>`;
+  });
+
+  document.getElementById("table").innerHTML = html;
+}
+
+function save() {
+  const id = document.getElementById("id").value;
+  const usn = document.getElementById("usn").value.trim();
+  const name = document.getElementById("name").value.trim();
+  const marks = Number(document.getElementById("marks").value);
+
+  if (!usn || !name || isNaN(marks)) {
+    alert("Invalid input");
+    return;
+  }
+
+  const data = { usn, name, marks };
+  const url = id
+    ? `http://localhost:3000/students/${id}`
+    : "http://localhost:3000/students";
+
+  fetch(url, {
+    method: id ? "PUT" : "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
+  })
+  .then(r => r.json())
+  .then(msg => {
+    alert(msg.message);
+    document.querySelectorAll("input").forEach(i => i.value = "");
+    loadAll();
+  });
+}
+
+function edit(s) {
+  id.value = s.id;
+  usn.value = s.usn;
+  name.value = s.name;
+  marks.value = s.marks;
+}
+
+function del(id) {
+  if (!confirm("Delete this student?")) return;
+  fetch(`http://localhost:3000/students/${id}`, { method: "DELETE" })
+    .then(r => r.json())
+    .then(msg => {
+      alert(msg.message);
+      loadAll();
+    });
+}
+
+loadAll();
+</script>
+
+</body>
+</html>
